@@ -1,0 +1,82 @@
+# Kitap Takip Uygulaması
+
+Bu proje Python dersinde yaptığımız basit bir kitap takip programı. Okuduğunuz veya okuyacağunuz kitapları ekleyebiliyorsunuz, listeleyebiliyorsunuz, okundu/okunmadı diye işaretleyebiliyorsunuz ve silebiliyorsunuz.
+
+Program konsol (terminal) üzerinden çalışıyor, yani menüden numara seçip işlem yapıyorsunuz.
+
+## Gereksinimler
+
+- Python 3 yüklü olmalı
+- Ekstra bir kütüphane kurmanıza gerek yok (sadece Python'un kendi `json` modülünü kullanıyoruz)
+
+## Nasıl Çalıştırılır?
+
+1. Bu klasörde terminal açın
+2. Şu komutu yazın:
+
+```
+python kitap.py
+```
+
+Windows'ta `python3` yerine genelde `python` yazıyoruz, ikisi de olur.
+
+## Menü Seçenekleri
+
+Program açılınca şu menü gelir:
+
+1. **Kitapları Listele** — Eklediğiniz kitapları numaralı şekilde gösterir
+2. **Yeni Kitap Ekle** — Başlık ve yazar sorar, kitabı listeye ekler
+3. **Okundu/Okunmadı İşaretle** — Kitap numarasına göre durumu değiştirir
+4. **Kitap Sil** — Seçtiğiniz kitabı listeden siler
+5. **Çıkış** — Programı kapatır
+
+## Dosya Kaydı (kitaplar.json)
+
+Kitaplar `kitaplar.json` adlı bir dosyada saklanıyor. Program her ekleme, silme veya durum değişikliğinden sonra bu dosyayı güncelliyor.
+
+Yani programı kapatıp tekrar açsanız bile kitaplar kaybolmuyor. İlk kez çalıştırınca dosya yoksa program "Kayıt dosyası bulunamadı" diye uyarı verip boş liste ile başlıyor.
+
+## Nasıl Çalışıyor?
+
+Kısaca akış şöyle:
+
+1. Program başlar, varsa `kitaplar.json` dosyasını okur
+2. Ana menü gösterilir
+3. Siz bir seçenek girersiniz (1-5)
+4. Seçime göre ilgili fonksiyon çalışır (listele, ekle, durum değiştir, sil)
+5. Değişiklik yapıldıysa dosyaya kaydedilir
+6. Menü tekrar gelir, 5'e basana kadar devam eder
+
+Her kitap program içinde bir sözlük (dict) olarak tutuluyor:
+
+```python
+{"baslik": "Suç ve Ceza", "yazar": "Dostoyevski", "durum": "okunmadı"}
+```
+
+Tüm kitaplar da bir liste içinde duruyor.
+
+## Hata Kontrolleri
+
+Programda birkaç yerde hata kontrolü var:
+
+- Menüde 1-5 dışında bir şey girerseniz uyarı verir, program kapanmaz
+- Kitap eklerken boş başlık veya yazar yazarsanız kabul etmez
+- Kitap numarası isterken harf girerseniz "Lütfen bir sayı girin!" der
+- Olmayan bir numara girerseniz "Geçersiz kitap numarası!" der
+- Dosya yoksa program çökmez, yeni liste oluşturur
+
+## Test Etmek İçin
+
+Şunları deneyebilirsiniz:
+
+- İlk açılışta 1'e basın → "Henüz kayıtlı kitap yok" demeli
+- 2 ile kitap ekleyin, sonra 1 ile listeyin
+- Boş başlık yazmayı deneyin → reddetmeli
+- 3 ile durumu değiştirin, 4 ile silin
+- Programı kapatıp tekrar açın → kitaplar duruyor olmalı
+- Menüde 7 gibi geçersiz bir sayı girin → hata mesajı vermeli
+
+## Dosyalar
+
+- `kitap.py` — Ana program dosyası
+- `kitaplar.json` — Kitapların kaydedildiği dosya (program çalışınca oluşur)
