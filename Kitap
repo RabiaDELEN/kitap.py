@@ -1,0 +1,200 @@
+"""
+Kitap Takip Uygulaması
+----------------------
+Amaç: Okunan/okunacak kitapları ekleyen, listeleyen, durumunu
+(okundu/okunmadı) güncelleyen ve silen basit bir konsol uygulaması.
+Kitaplar 'kitaplar.json' dosyasında saklanır; program kapanıp açılınca
+kayıtlar korunur.
+
+Nasıl çalıştırılır:
+- python kitap.py
+
+İşlevler:
+1. Kitapları Listele
+2. Yeni Kitap Ekle (boş başlık/yazar kabul etmez)
+3. Okundu/Okunmadı İşaretle
+4. Kitap Sil
+5. Çıkış (kayıtları dosyaya yazar)
+"""
+
+import json
+
+# kitapların kaydedileceği dosya adı
+DOSYA_ADI = "kitaplar.json"
+
+# tüm kitapları burada tutuyoruz (liste içinde sözlükler var)
+kitaplar = []
+
+
+def kitaplari_yukle():
+    """Program açılınca dosyadan kitapları okur."""
+    global kitaplar
+
+    try:
+        # dosyayı açıp json olarak okuyoruz
+        with open(DOSYA_ADI, "r", encoding="utf-8") as dosya:
+            kitaplar = json.load(dosya)
+        print("Kitaplar başarıyla yüklendi.")
+
+    except FileNotFoundError:
+        # dosya yoksa boş liste ile başlıyoruz, program çökmesin diye
+        kitaplar = []
+        print("Kayıt dosyası bulunamadı. Yeni bir liste oluşturuldu.")
+
+    except (json.JSONDecodeError, OSError):
+        # dosya bozuksa veya okunamazsa yine boş liste
+        kitaplar = []
+        print("Dosya okunamadı. Yeni bir liste oluşturuldu.")
+
+
+def kitaplari_kaydet():
+    """Kitap listesini dosyaya yazar."""
+    try:
+        with open(DOSYA_ADI, "w", encoding="utf-8") as dosya:
+            json.dump(kitaplar, dosya, ensure_ascii=False, indent=2)
+        print("Kitaplar başarıyla kaydedildi.")
+
+    except OSError:
+        # yazma hatası olursa en azından program kapanmasın
+        print("Dosyaya kaydedilemedi!")
+
+
+def menu_goster():
+    """Ana menüyü ekrana yazdırır."""
+    print()
+    print("--- KİTAP TAKİP UYGULAMASI ---")
+    print("1. Kitapları Listele")
+    print("2. Yeni Kitap Ekle")
+    print("3. Okundu/Okunmadı İşaretle")
+    print("4. Kitap Sil")
+    print("5. Çıkış")
+
+
+def kitaplari_listele():
+    """Kitapları numaralı şekilde listeler."""
+    if len(kitaplar) == 0:
+        print("Henüz kayıtlı kitap yok.")
+        return
+
+    print("--- KİTAP LİSTESİ ---")
+    # enumerate ile numara veriyoruz, 1'den başlasın diye +1 ekledik
+    for i, kitap in enumerate(kitaplar):
+        numara = i + 1
+        print(f"{numara}. {kitap['baslik']} — {kitap['yazar']} [{kitap['durum']}]")
+    print("---------------------")
+
+
+def kitap_ekle():
+    """Kullanıcıdan bilgi alıp yeni kitap ekler."""
+    baslik = input("Kitap başlığı: ").strip()
+    if baslik == "":
+        print("Başlık boş olamaz!")
+        return
+
+    yazar = input("Yazar: ").strip()
+    if yazar == "":
+        print("Yazar boş olamaz!")
+        return
+
+    # yeni kitabı sözlük olarak oluşturuyoruz
+    yeni_kitap = {
+        "baslik": baslik,
+        "yazar": yazar,
+        "durum": "okunmadı"  # yeni kitap varsayılan okunmadı
+    }
+
+    kitaplar.append(yeni_kitap)
+    print(f"'{baslik}' eklendi.")
+    kitaplari_kaydet()
+
+
+def durum_degistir():
+    """Seçilen kitabın okundu/okunmadı durumunu değiştirir."""
+    if len(kitaplar) == 0:
+        print("Henüz kayıtlı kitap yok.")
+        return
+
+    kitaplari_listele()
+
+    numara_metin = input("Durumunu değiştirmek istediğiniz kitabın numarası: ")
+
+    try:
+        numara = int(numara_metin)
+    except ValueError:
+        # kullanıcı sayı yerine harf girerse buraya düşer
+        print("Lütfen bir sayı girin!")
+        return
+
+    # geçerli aralıkta mı kontrol ediyoruz
+    if numara < 1 or numara > len(kitaplar):
+        print("Geçersiz kitap numarası!")
+        return
+
+    kitap = kitaplar[numara - 1]
+
+    # durumu tersine çeviriyoruz
+    if kitap["durum"] == "okundu":
+        kitap["durum"] = "okunmadı"
+    else:
+        kitap["durum"] = "okundu"
+
+    print(f"'{kitap['baslik']}' artık [{kitap['durum']}] olarak işaretlendi.")
+    kitaplari_kaydet()
+
+
+def kitap_sil():
+    """Seçilen kitabı listeden siler."""
+    if len(kitaplar) == 0:
+        print("Henüz kayıtlı kitap yok.")
+        return
+
+    kitaplari_listele()
+
+    numara_metin = input("Silmek istediğiniz kitabın numarası: ")
+
+    try:
+        numara = int(numara_metin)
+    except ValueError:
+        print("Lütfen bir sayı girin!")
+        return
+
+    if numara < 1 or numara > len(kitaplar):
+        print("Geçersiz kitap numarası!")
+        return
+
+    silinen = kitaplar.pop(numara - 1)
+    print(f"'{silinen['baslik']}' silindi.")
+    kitaplari_kaydet()
+
+
+# program buradan başlıyor
+if __name__ == "__main__":
+    print("Kitap Takip Uygulamasına Hoş Geldiniz!")
+
+    kitaplari_yukle()
+
+    # çıkış seçilene kadar menü gösterilecek
+    while True:
+        menu_goster()
+        secim = input("Seçiminiz (1-5): ")
+
+        if secim == "1":
+            kitaplari_listele()
+
+        elif secim == "2":
+            kitap_ekle()
+
+        elif secim == "3":
+            durum_degistir()
+
+        elif secim == "4":
+            kitap_sil()
+
+        elif secim == "5":
+            print("Programdan çıkılıyor...")
+            break
+
+        else:
+            # geçersiz menü seçimi
+            print("Geçersiz seçim! Lütfen 1-5 arası bir değer girin.")
+
